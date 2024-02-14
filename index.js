@@ -60,15 +60,20 @@ app.delete("/api/persons/:id", (request, response) => {
 app.post("/api/persons", (request, response) => {
     const body = request.body
     if(body.name && body.number) {
-        const person = {
-            name: body.name,
-            number: body.number,
-            id: Math.floor((Math.random() * Math.random() * Math.random() ) * 10000000),
+        if(!persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())){
+            const person = {
+                name: body.name,
+                number: body.number,
+                id: Math.floor((Math.random() * Math.random() * Math.random() ) * 10000000),
+            }
+            persons = persons.concat(person)
+
+            response.json(person)
+        } else {
+            response.status(400).json({
+                error: "name must be unique"
+            })
         }
-
-        persons = persons.concat(person)
-
-        response.json(person)
     } else {
         response.status(400).json({
             error: "Missing name or number"
