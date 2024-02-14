@@ -1,0 +1,27 @@
+{
+  "name": "phonebook",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo: \"not implemented\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imdshk/course-fullstack-web-development-backend.git"
+  },
+  "author": "Imaad Shaik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/imdshk/course-fullstack-web-development-backend/issues"
+  },
+  "homepage": "https://github.com/imdshk/course-fullstack-web-development-backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
