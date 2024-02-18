@@ -9,19 +9,19 @@ const app = express()
 
 app.use(express.json())
 app.use(cors())
-app.use(express.static('dist'))
+app.use(express.static("dist"))
 
 
-morgan.token('body', request => {
+morgan.token("body", request => {
     return JSON.stringify(request.body)
-  })
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+})
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"))
 
 // get information about phonebook
 app.get("/info", async (request, response, next) => {
     await Person
         .estimatedDocumentCount()
-        .then(count =>{
+        .then(count => {
             response.send(`<p>Phonebook has info for ${count} people</p><br/>${Date()}`)
         })
         .catch(error => error(next))
@@ -34,7 +34,7 @@ app.get("/api/persons", (request, response, next) => {
         .then(persons => {
             response.json(persons)
         })
-        .catch(error => next(error))  
+        .catch(error => next(error))
 })
 
 // get a person with id from the phonebook
@@ -49,7 +49,7 @@ app.get("/api/persons/:id", (request, response, next) => {
                 response.status(404).end()
             }
         })
-        .catch(error => next(error)) 
+        .catch(error => next(error))
 })
 
 // delete a person with id from the phonebook
@@ -64,11 +64,11 @@ app.delete("/api/persons/:id", (request, response, next) => {
                 response.status(404).end()
             }
         })
-        .catch(error => next(error)) 
+        .catch(error => next(error))
 })
 
 // create a person in the phonebook
-app.post("/api/persons", (request, response, next) => {   
+app.post("/api/persons", (request, response, next) => {
     const body = request.body
     if (body.name === undefined || body.name === null) {
         response.status(400).json({
@@ -89,7 +89,7 @@ app.post("/api/persons", (request, response, next) => {
         .catch(error => next(error))
 })
 
-// update a person with id in the phonebook 
+// update a person with id in the phonebook
 app.put("/api/persons/:id", (request, response, next) => {
     const id = request.params.id
     const body = request.body
@@ -110,7 +110,7 @@ app.put("/api/persons/:id", (request, response, next) => {
                 })
             }
         })
-        .catch(error => next(error)) 
+        .catch(error => next(error))
 })
 
 // error handling function
@@ -120,14 +120,13 @@ const errorHandler = (error, request, response, next) => {
     if(error.name === "CastError") {
         return response.status(400).send({ error: "malformatted id" })
     } else if (error.name === "ValidationError") {
-        return response.status(400).json({ error: error.message})
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
 }
 
 app.use(errorHandler)
-
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
