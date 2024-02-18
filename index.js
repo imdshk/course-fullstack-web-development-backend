@@ -17,28 +17,27 @@ morgan.token('body', request => {
   })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-app.get("/info", async (request, response) => {
+// get information about phonebook
+app.get("/info", async (request, response, next) => {
     await Person
         .estimatedDocumentCount()
         .then(count =>{
             response.send(`<p>Phonebook has info for ${count} people</p><br/>${Date()}`)
         })
-        .catch(error => {
-            response.status(500).end()
-        })
+        .catch(error => error(next))
 })
 
-app.get("/api/persons", (request, response) => {
+// get list of persons from the phonebook
+app.get("/api/persons", (request, response, next) => {
     Person
         .find({})
         .then(persons => {
             response.json(persons)
         })
-        .catch(error => {
-            response.status(500).end()
-        })  
+        .catch(error => next(error))  
 })
 
+// get a person with id from the phonebook
 app.get("/api/persons/:id", (request, response, next) => {
     const id = request.params.id
     Person
@@ -53,6 +52,7 @@ app.get("/api/persons/:id", (request, response, next) => {
         .catch(error => next(error)) 
 })
 
+// delete a person with id from the phonebook
 app.delete("/api/persons/:id", (request, response, next) => {
     const id = request.params.id
     Person
@@ -67,7 +67,8 @@ app.delete("/api/persons/:id", (request, response, next) => {
         .catch(error => next(error)) 
 })
 
-app.post("/api/persons", (request, response) => {
+// create a person in the phonebook
+app.post("/api/persons", (request, response, next) => {   
     const body = request.body
     if (body.name === undefined || body.name === null) {
         response.status(400).json({
@@ -75,49 +76,44 @@ app.post("/api/persons", (request, response) => {
         })
     }
 
-    const person = new Person({
+    const newPerson = new Person({
         name: body.name,
         number: body.number,
     })
 
-    person
+    newPerson
         .save()
         .then(savedPerson => {
             response.json(savedPerson)
         })
-        .catch(error => {
-            response.status(500).end()
-        })
-
-    // if(name && number) {        
-    //     Person
-    //         .findOne({"name": name})
-    //         .then(result => {
-    //             console.log(result)
-    //         })
-        
-//         if(!persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())){
-//             const person = {
-//                 name: body.name,
-//                 number: body.number,
-//                 id: Math.floor((Math.random() * Math.random() * Math.random() ) * 10000000),
-//             }
-//             persons = persons.concat(person)
-
-//             response.json(person)
-//         } else {
-//             response.status(400).json({
-//                 error: "name must be unique"
-//             })
-//         }
-//     } else {
-//         response.status(400).json({
-//             error: "Missing name or number"
-//         })
-    // }
+        .catch(error => next(error))
 })
 
-// Error handling function
+// update a person with id in the phonebook 
+app.put("/api/persons/:id", (request, response, next) => {
+    const id = request.params.id
+    const body = request.body
+
+    const personToUpdate = {
+        name: body.name,
+        number: body.number,
+    }
+
+    Person
+        .findByIdAndUpdate(id, personToUpdate, { new : true })
+        .then(updatedPerson => {
+            if(updatedPerson) {
+                response.json(updatedPerson)
+            } else {
+                response.status(404).json({
+                    error: `${body.name} does not exist in the phonebook anymore. Please refresh the page and try again!`
+                })
+            }
+        })
+        .catch(error => next(error)) 
+})
+
+// error handling function
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
 
